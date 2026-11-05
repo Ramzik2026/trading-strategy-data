@@ -1,6 +1,6 @@
 {
   "exchange": "BingX",
-  "checked_at_utc": "2026-11-05T13:38:24.579768+00:00",
+  "checked_at_utc": "2026-11-05T15:19:46.306491+00:00",
   "checks": {
     "klines_15m": {
       "ok": true,
