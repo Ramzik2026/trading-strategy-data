@@ -2,7 +2,6 @@
 """Public Bybit USDT perpetual market snapshots. No credentials, no orders."""
 import datetime as dt
 import json
-import os
 import pathlib
 import time
 import urllib.error
@@ -13,7 +12,7 @@ SYMBOLS = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "HYPEUSDT", "BNBUSDT", "D
 INTERVALS = ("15", "60", "240")
 HOSTS = ("https://api.bybit.com", "https://api.bytick.com")
 ROOT = pathlib.Path("data")
-MAX_AGE_SECONDS = 300
+
 
 def fetch(path, params):
     query = urllib.parse.urlencode(params)
@@ -28,7 +27,8 @@ def fetch(path, params):
                 raise ValueError(f"Bybit retCode={payload.get('retCode')}: {payload.get('retMsg')}")
             return payload, host
         except (OSError, ValueError, json.JSONDecodeError) as exc:
-            failures.append(f"{host}: {type(exc).__name__}: {str(exc)[:160]}")
+            detail = f"{host}: {type(exc).__name__}: {str(exc)[:160]}"
+            failures.append(detail)
             time.sleep(0.2)
     raise RuntimeError("; ".join(failures))
 
@@ -38,6 +38,14 @@ def main():
     stamp = dt.datetime.fromtimestamp(now_ms / 1000, dt.timezone.utc).isoformat()
     result = {"collected_at_utc": stamp, "collected_at_ms": now_ms, "exchange": "Bybit", "category": "linear", "symbols": {}, "errors": [], "status": "partial"}
     success = 0
+    # Fail fast on network/region blocks; do not spam the same inaccessible API 70 times.
+    try:
+        fetch("/v5/market/kline", {"category": "linear", "symbol": "BTCUSDT", "interval": "15", "limit": 2})
+    except Exception as exc:
+        diagnostic = {"checked_at_utc": stamp, "status": "unavailable", "reason": str(exc), "successful_requests": 0, "source": "Bybit public REST", "note": "No market data published; prior snapshot, if any, must be checked for staleness"}
+        (ROOT / "status.json").write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print("BYBIT CONNECTIVITY FAILED: " + str(exc), flush=True)
+        raise SystemExit(2)
     for symbol in SYMBOLS:
         item = {"symbol": symbol, "intervals": {}, "ticker": None, "open_interest": None, "funding_history": None, "instrument": None}
         for field, path, params in [
@@ -70,9 +78,6 @@ def main():
     target = ROOT / "latest.json"
     target.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print(f"{stamp}: {result['status']}, {success}/{result['expected_requests']} requests, {len(result['errors'])} errors")
-    # Do not overwrite a previous valid snapshot with an all-failed collection.
-    if success == 0:
-        target.unlink()
-        raise SystemExit("No Bybit data retrieved; preserving previous published snapshot")
+    (ROOT / "status.json").write_text(json.dumps({"checked_at_utc": stamp, "status": result["status"], "successful_requests": success, "expected_requests": result["expected_requests"], "error_count": len(result["errors"])}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 if __name__ == "__main__":
     main()
