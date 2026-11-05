@@ -1,8 +1,9 @@
 {
-  "checked_at_utc": "2026-11-05T11:04:27.446000+00:00",
-  "status": "unavailable",
-  "reason": "https://api.bybit.com: HTTPError: HTTP Error 403: Forbidden; https://api.bytick.com: HTTPError: HTTP Error 403: Forbidden",
-  "successful_requests": 0,
-  "source": "Bybit public REST",
-  "note": "No market data published; prior snapshot, if any, must be checked for staleness"
+  "checked_at_utc": "2026-11-05T11:37:28.850664+00:00",
+  "source": "BingX public perpetual REST",
+  "successful_requests": 50,
+  "expected_requests": 50,
+  "status": "complete",
+  "errors": {},
+  "note": "Do not treat missing fields or stale snapshots as valid signals"
 }
