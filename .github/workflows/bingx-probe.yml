@@ -1,0 +1,29 @@
+name: BingX market connectivity probe
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: bingx-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/probe_bingx.py
+      - name: Publish results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/bingx-probe.json
+          if ! git diff --cached --quiet; then
+            git commit -m "data: update BingX connectivity probe"
+            git push
+          fi
