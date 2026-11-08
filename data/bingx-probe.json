@@ -1,6 +1,6 @@
 {
   "exchange": "BingX",
-  "checked_at_utc": "2026-11-08T14:05:45.881911+00:00",
+  "checked_at_utc": "2026-11-08T14:58:16.402100+00:00",
   "checks": {
     "klines_15m": {
       "ok": true,
@@ -9,10 +9,10 @@
       "items": 3
     },
     "klines_1h": {
-      "ok": true,
-      "code": 0,
-      "msg": "",
-      "items": 3
+      "ok": false,
+      "code": 100410,
+      "msg": "请稍后重试",
+      "items": null
     },
     "klines_4h": {
       "ok": true,
@@ -33,5 +33,5 @@
       "items": 2
     }
   },
-  "status": "complete"
+  "status": "partial"
 }
