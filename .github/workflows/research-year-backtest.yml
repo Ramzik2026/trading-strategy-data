@@ -1,0 +1,30 @@
+name: Trading AI 365d research validation
+on:
+  push:
+    branches:
+      - research/multiagent-year-v12
+    paths:
+      - 'research/year_backtest.py'
+      - '.github/workflows/research-year-backtest.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run read-only BingX historical strategy comparison
+        run: python research/year_backtest.py --symbol BTC-USDT --start 2025-11-23 --end 2026-11-23 --output research/results/year_backtest.json
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BTCUSDT-year-research-v12
+          path: research/results/year_backtest.json
+          if-no-files-found: warn
+          retention-days: 14
