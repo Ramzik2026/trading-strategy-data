@@ -14,7 +14,7 @@ from pathlib import Path
 from year_backtest import (HOUR,FOUR,ema,atr,fetch,risk,exitbar,stamp,iso)
 
 ASSETS=('BTC-USDT','ETH-USDT','SOL-USDT')
-AGENTS=('RSI14_Reversal','MACD_Zero','Donchian55','Volume_Breakout','SNR_Retest_3x3')
+AGENTS=('RSI14_Reversal','RSI14_Reversal_2_5R','MACD_Zero','Donchian55','Volume_Breakout','SNR_Retest_3x3')
 
 def rsi_wilder(closes,n=14):
     out=[None]*len(closes)
@@ -57,10 +57,14 @@ def detect(bars):
         if rsi[i-1] is not None:
             if rsi[i-1]<30<=rsi[i]:
                 st=b.c-2*span;tp=b.c+4*span
-                if st>0:result['RSI14_Reversal'][i]=(1,st,tp)
+                if st>0:
+                    result['RSI14_Reversal'][i]=(1,st,tp)
+                    result['RSI14_Reversal_2_5R'][i]=(1,st,b.c+5*span)
             elif rsi[i-1]>70>=rsi[i]:
                 st=b.c+2*span;tp=b.c-4*span
-                if tp>0:result['RSI14_Reversal'][i]=(-1,st,tp)
+                if tp>0:
+                    result['RSI14_Reversal'][i]=(-1,st,tp)
+                    if b.c-5*span>0:result['RSI14_Reversal_2_5R'][i]=(-1,st,b.c-5*span)
         # MACD zero cross. Only previously closed and current closed values.
         if m[i-1] is not None:
             if m[i-1]<=0<m[i]:
@@ -184,7 +188,7 @@ def main():
     split2=start+int((end-start)//HOUR*.8)*HOUR
     segments=[('full',start,end),('dev_60',start,split1),
               ('validation_20',split1,split2),('holdout_20',split2,end)]
-    result={'version':'independent-agents-year v1.0',
+    result={'version':'independent-agents-year v1.1 with RSI RR sensitivity',
             'asset':args.symbol,'window':[args.start,args.end],
             'data_count_1h':len(bars),'executions_enabled':False,
             'cost':{'fee_each_side':.0005,'slippage_each_side':.0002,
