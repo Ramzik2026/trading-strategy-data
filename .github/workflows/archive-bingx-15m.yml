@@ -5,6 +5,7 @@ on:
       - research/multiagent-year-v12
     paths:
       - 'scripts/archive_bingx_15m.py'
+      - 'research/tests/test_archive_bingx_15m.py'
       - '.github/workflows/archive-bingx-15m.yml'
   workflow_dispatch:
   schedule:
@@ -24,6 +25,8 @@ jobs:
           ref: research/multiagent-year-v12
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - name: Unit test archive integrity before collection
+        run: python -m unittest discover -s research/tests -p 'test_archive_bingx_15m.py' -v
       - name: Collect public closed 15m futures candles without keys
         run: python scripts/archive_bingx_15m.py
       - name: Publish only validated historical archive
