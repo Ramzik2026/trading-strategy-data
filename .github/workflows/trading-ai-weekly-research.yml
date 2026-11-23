@@ -1,0 +1,53 @@
+name: Trading AI weekly research-only strategy replay
+on:
+  schedule:
+    - cron: '27 7 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: trading-ai-weekly-research
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout FROZEN research code (no live trading)
+        uses: actions/checkout@v4
+        with:
+          ref: 25313d947085367bb1a1c51f530c6754e49a6f4d
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Run deterministic tests
+        run: python -m unittest discover -s research -p 'test_independent_agents_v1.py' -v
+      - name: Re-evaluate existing BTC ETH SOL indicators on rolling 365d
+        run: |
+          END=$(date -u +%F)
+          START=$(date -u -d '365 days ago' +%F)
+          for SYMBOL in BTC-USDT ETH-USDT SOL-USDT; do
+            LABEL=$(echo "$SYMBOL" | cut -d- -f1)
+            python research/independent_agents_v1.py --symbol "$SYMBOL" --start "$START" --end "$END" --output "research/results/weekly_${LABEL}.json"
+          done
+      - name: Safe replay status (no signals or orders)
+        run: |
+          python - <<'PY'
+          import glob,json
+          files=glob.glob('research/results/weekly_*.json')
+          if len(files)!=3:raise SystemExit('INCOMPLETE WEEKLY REPORT: all three assets required')
+          for f in files:
+              d=json.load(open(f))
+              print('REPORT',d['asset'],'period',d['window'])
+              for agent,segments in d['agents'].items():
+                  x=segments['full']
+                  print(agent,'trades',x['closed_trades'],'return',x['return_ex_funding_pct'],'PF',x['profit_factor_ex_funding'])
+          print('RESEARCH_ONLY: funding absent; no live orders or promotions')
+          PY
+      - name: Save weekly snapshot as immutable audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-ai-weekly-research
+          path: research/results/weekly_*.json
+          if-no-files-found: warn
+          retention-days: 30
