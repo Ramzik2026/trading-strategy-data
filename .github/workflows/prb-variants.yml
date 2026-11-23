@@ -1,0 +1,36 @@
+name: Trading AI PRB 12 hypotheses x 3 assets
+on:
+  push:
+    branches: [research/multiagent-year-v12]
+    paths: ['research/prb_variants.py', 'research/prb_v15_engine.py', '.github/workflows/prb-variants.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  variants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - symbol: BTC-USDT
+            short: BTC
+          - symbol: ETH-USDT
+            short: ETH
+          - symbol: SOL-USDT
+            short: SOL
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Run 12 RB variants and 60/20/20 chronological splits
+        run: python research/prb_variants.py --symbol ${{ matrix.symbol }} --start 2026-09-25 --end 2026-11-23 --output research/results/PRB_variants_${{ matrix.short }}.json
+      - name: Store all results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PRB-variants-${{ matrix.short }}
+          path: research/results/PRB_variants_*.json
+          if-no-files-found: warn
+          retention-days: 14
