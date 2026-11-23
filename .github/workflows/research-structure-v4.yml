@@ -1,0 +1,43 @@
+name: Read-only FVG weekly trend and hourly structure research
+on:
+  push:
+    branches:
+      - research/fvg-structure-1w-1h-v4
+    paths:
+      - 'research/structure_v4/**'
+      - '.github/workflows/research-structure-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isolated-fvg-structure-v4
+  cancel-in-progress: false
+
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - name: Unit tests, no external dependencies
+        run: python -m unittest discover -s research/structure_v4/tests -v
+      - name: Download public BingX completed 4H and 1H bars and compare fixed models
+        run: python research/structure_v4/structure.py --days 365 --symbols BTC-USDT ETH-USDT SOL-USDT --out research-structure-output
+      - name: Publish summary
+        if: success()
+        run: cat research-structure-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Audit package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bingx-fvg-structure-annual-v4
+          path: research-structure-output/
+          if-no-files-found: warn
+          retention-days: 14
