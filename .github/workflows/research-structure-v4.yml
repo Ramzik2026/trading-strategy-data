@@ -1,8 +1,8 @@
-name: Read-only FVG weekly trend and hourly structure research
+name: Independent validation: FVG structure on XRP BNB LINK
 on:
   push:
     branches:
-      - research/fvg-structure-1w-1h-v4
+      - research/fvg-structure-1w-1h-v4-validate
     paths:
       - 'research/structure_v4/**'
       - '.github/workflows/research-structure-v4.yml'
@@ -29,7 +29,7 @@ jobs:
       - name: Unit tests, no external dependencies
         run: python -m unittest discover -s research/structure_v4/tests -v
       - name: Download public BingX completed 4H and 1H bars and compare fixed models
-        run: python research/structure_v4/structure.py --days 365 --symbols BTC-USDT ETH-USDT SOL-USDT --out research-structure-output
+        run: python research/structure_v4/structure.py --days 365 --symbols XRP-USDT BNB-USDT LINK-USDT --out research-structure-output
       - name: Publish summary
         if: success()
         run: cat research-structure-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
