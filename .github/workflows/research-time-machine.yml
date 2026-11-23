@@ -1,0 +1,43 @@
+name: Isolated annual BingX FVG TimeMachine study
+on:
+  push:
+    branches:
+      - research/fvg-timemachine-v3
+    paths:
+      - 'research/timemachine/**'
+      - '.github/workflows/research-time-machine.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: annual-research-bingx
+  cancel-in-progress: false
+
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - name: Verify deterministic simulation and candle validation
+        run: python -m unittest discover -s research/timemachine/tests -v
+      - name: Fetch full year of closed candles and run independent paper study
+        run: python research/timemachine/annual.py --days 365 --draws 1000 --symbols BTC-USDT ETH-USDT SOL-USDT --out research-output
+      - name: Publish Markdown result to Actions summary
+        if: success()
+        run: cat research-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload data and results for auditing
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bingx-fvg-timemachine-annual
+          path: research-output/
+          if-no-files-found: warn
+          retention-days: 14
