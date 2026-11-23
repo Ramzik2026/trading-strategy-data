@@ -1,0 +1,38 @@
+name: Trading AI independent 1h yearly strategy comparison
+on:
+  push:
+    branches: [research/multiagent-year-v12]
+    paths: ['research/independent_agents_v1.py','research/test_independent_agents_v1.py','.github/workflows/independent-agents.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  yearly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - symbol: BTC-USDT
+            short: BTC
+          - symbol: ETH-USDT
+            short: ETH
+          - symbol: SOL-USDT
+            short: SOL
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate 5 independent agent calculations
+        run: python -m unittest discover -s research -p 'test_independent_agents_v1.py' -v
+      - name: Backtest yearly agents without order permissions
+        run: python research/independent_agents_v1.py --symbol ${{ matrix.symbol }} --start 2025-11-23 --end 2026-11-23 --output research/results/independent_${{ matrix.short }}.json
+      - name: Save reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-agents-${{ matrix.short }}
+          path: research/results/independent_*.json
+          if-no-files-found: warn
+          retention-days: 14

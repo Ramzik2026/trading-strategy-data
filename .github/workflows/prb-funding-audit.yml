@@ -1,0 +1,34 @@
+name: Trading AI PRB historical funding and censorship audit
+on:
+  push:
+    branches: [research/multiagent-year-v12]
+    paths: ['research/prb_funding_audit.py','.github/workflows/prb-funding-audit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Get immutable first-test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: multiagent-PRB-v14-btc-eth-sol
+          path: research/results
+          run-id: 45269106688
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute settled funding and censored-trade audit
+        run: python research/prb_funding_audit.py --directory research/results --out research/results/PRB_funding_audit.json
+      - name: Save funding results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiagent-PRB-v14-audited
+          path: research/results/PRB_funding_audit.json
+          if-no-files-found: warn
+          retention-days: 14

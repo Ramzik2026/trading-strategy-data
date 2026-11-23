@@ -1,0 +1,38 @@
+name: Trading AI PRB v1.4 15m short-window three-asset study
+on:
+  push:
+    branches:
+      - research/multiagent-year-v12
+    paths:
+      - 'research/prb_v14.py'
+      - 'research/prb_v14_59d.py'
+      - 'research/test_prb_v14.py'
+      - '.github/workflows/prb-v14.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit validation
+        run: python -m unittest discover -s research -p 'test_prb_v14.py' -v
+      - name: BTCUSDT independent RB test
+        run: python research/prb_v14_59d.py --symbol BTC-USDT --start 2026-09-25 --end 2026-11-23 --output research/results/PRB_BTC.json
+      - name: ETHUSDT independent RB test
+        run: python research/prb_v14_59d.py --symbol ETH-USDT --start 2026-09-25 --end 2026-11-23 --output research/results/PRB_ETH.json
+      - name: SOLUSDT independent RB test
+        run: python research/prb_v14_59d.py --symbol SOL-USDT --start 2026-09-25 --end 2026-11-23 --output research/results/PRB_SOL.json
+      - name: Save all reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiagent-PRB-v14-btc-eth-sol
+          path: research/results/PRB_*.json
+          if-no-files-found: warn
+          retention-days: 14
