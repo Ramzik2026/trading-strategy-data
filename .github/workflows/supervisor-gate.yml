@@ -1,0 +1,37 @@
+name: Trading AI Supervisor strategy acceptance gate
+on:
+  push:
+    branches: [research/multiagent-year-v12]
+    paths: ['research/supervisor_gate.py', 'research/test_supervisor_gate.py', '.github/workflows/supervisor-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Test no-live-trade governance
+        run: python -m unittest discover -s research -p 'test_supervisor_gate.py' -v
+      - name: Fetch immutable 3-asset PRB research artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: PRB-variants-*
+          merge-multiple: true
+          path: research/results
+          run-id: 45269886469
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Evaluate candidate eligibility
+        run: python research/supervisor_gate.py --reports research/results --output research/results/PRB_governance.json
+      - name: Publish audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiagent-supervisor-governance-report
+          path: research/results/PRB_governance.json
+          if-no-files-found: warn
+          retention-days: 14
