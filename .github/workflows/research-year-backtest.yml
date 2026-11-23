@@ -5,6 +5,7 @@ on:
       - research/multiagent-year-v12
     paths:
       - 'research/year_backtest.py'
+      - 'research/year_stress.py'
       - '.github/workflows/research-year-backtest.yml'
   workflow_dispatch:
 permissions:
@@ -20,11 +21,15 @@ jobs:
           python-version: '3.12'
       - name: Run read-only BingX historical strategy comparison
         run: python research/year_backtest.py --symbol BTC-USDT --start 2025-11-23 --end 2026-11-23 --output research/results/year_backtest.json
+      - name: Audit 1H/4H consistency and cost stress
+        run: python research/year_stress.py --symbol BTC-USDT --start 2025-11-23 --end 2026-11-23 --output research/results/year_stress.json
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: BTCUSDT-year-research-v12
-          path: research/results/year_backtest.json
+          path: |
+            research/results/year_backtest.json
+            research/results/year_stress.json
           if-no-files-found: warn
           retention-days: 14
