@@ -5,22 +5,16 @@
   "completed": true,
   "symbols": {
     "BTC-USDT": {
-      "new": 8726,
-      "last_close_utc": "2026-11-23T21:30:00+00:00",
-      "total_fetched": 8726,
-      "start": "2026-08-25T00:00:00+00:00"
+      "new": 0,
+      "last_close_utc": "2026-11-23T21:30:00+00:00"
     },
     "ETH-USDT": {
-      "new": 8726,
-      "last_close_utc": "2026-11-23T21:30:00+00:00",
-      "total_fetched": 8726,
-      "start": "2026-08-25T00:00:00+00:00"
+      "new": 0,
+      "last_close_utc": "2026-11-23T21:30:00+00:00"
     },
     "SOL-USDT": {
-      "new": 8726,
-      "last_close_utc": "2026-11-23T21:30:00+00:00",
-      "total_fetched": 8726,
-      "start": "2026-08-25T00:00:00+00:00"
+      "new": 0,
+      "last_close_utc": "2026-11-23T21:30:00+00:00"
     }
   },
   "order_execution": false
