@@ -1,4 +1,4 @@
-name: Independent validation: FVG structure on XRP BNB LINK
+name: 'Independent validation: FVG structure on XRP BNB LINK'
 on:
   push:
     branches:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: isolated-fvg-structure-v4
+  group: isolated-fvg-structure-v4-validate
   cancel-in-progress: false
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bingx-fvg-structure-annual-v4
+          name: bingx-fvg-structure-validation-extra-assets
           path: research-structure-output/
           if-no-files-found: warn
           retention-days: 14
