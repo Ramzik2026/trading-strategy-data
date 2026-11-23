@@ -1,0 +1,30 @@
+name: Trading AI TDA v1.3 diagnostics
+on:
+  push:
+    branches:
+      - research/multiagent-year-v12
+    paths:
+      - 'research/tda_v13.py'
+      - '.github/workflows/tda-diagnostics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run closed-candle TDA diagnostics (read-only)
+        run: python research/tda_v13.py --symbol BTC-USDT --start 2025-11-23 --end 2026-11-23 --output research/results/tda_v13.json
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BTCUSDT-TDA-v13-diagnostics
+          path: research/results/tda_v13.json
+          if-no-files-found: warn
+          retention-days: 14
