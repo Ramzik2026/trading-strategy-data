@@ -1,26 +1,26 @@
 {
   "source": "BingX public USDT perpetual",
   "tf": "15m",
-  "last_run_utc": "2026-11-27T13:45:00+00:00",
+  "last_run_utc": "2026-11-28T00:00:00+00:00",
   "completed": true,
   "symbols": {
     "BTC-USDT": {
-      "new": 44,
-      "last_close_utc": "2026-11-27T13:45:00+00:00",
-      "total_fetched": 44,
-      "start": "2026-11-27T02:45:00+00:00"
+      "new": 41,
+      "last_close_utc": "2026-11-28T00:00:00+00:00",
+      "total_fetched": 41,
+      "start": "2026-11-27T13:45:00+00:00"
     },
     "ETH-USDT": {
-      "new": 44,
-      "last_close_utc": "2026-11-27T13:45:00+00:00",
-      "total_fetched": 44,
-      "start": "2026-11-27T02:45:00+00:00"
+      "new": 41,
+      "last_close_utc": "2026-11-28T00:00:00+00:00",
+      "total_fetched": 41,
+      "start": "2026-11-27T13:45:00+00:00"
     },
     "SOL-USDT": {
-      "new": 44,
-      "last_close_utc": "2026-11-27T13:45:00+00:00",
-      "total_fetched": 44,
-      "start": "2026-11-27T02:45:00+00:00"
+      "new": 41,
+      "last_close_utc": "2026-11-28T00:00:00+00:00",
+      "total_fetched": 41,
+      "start": "2026-11-27T13:45:00+00:00"
     }
   },
   "order_execution": false
